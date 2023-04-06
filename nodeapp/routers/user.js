@@ -1,3 +1,5 @@
+const Validate = require('../middlewars/validate')
+
 const express = require('express')
 const user_router = express.Router();
 
@@ -22,38 +24,30 @@ user_router.get('/',(req, res) => {
     res.status(200).send(users)
 })
 
-user_router.post('/add', (req, res) => {
+user_router.post('/', Validate, (req, res) => {
 	const user = {
         'id': users.length + 1,
         ...req.body
 	}
 	users.push(user)
-	res.status(201).send(JSON.stringify({
-		success: true,
-		notice: 'Ban da them thanh cong',
-		data: user
-	}))
+	res.status(201).json('Ban da them thanh cong')
 })
 
-user_router.put('/edit/:id', (req, res) => {
+user_router.put('/:id', (req, res) => {
 	const user = users.find(user => user.id === parseInt(req.params.id))
-    console.log(user);
-	user.fullname = req.body.fullname
-	user.gender = req.body.gender
-	user.age = req.body.age
-	res.send(JSON.stringify({
-		success: true,
-		notice: 'Ban da cap nhat thanh cong',
-		data: user
-	}))
+	if(req.body != null){
+		user.fullname = req.body.fullname
+		user.gender = req.body.gender
+		user.age = req.body.age
+		res.status(200).json(user)
+	} else {
+		res.status(204).json()
+	}
 })
 
-user_router.delete('/delete/:id', (req, res) => {
+user_router.delete('/:id', (req, res) => {
 	users = users.filter(item => item.id !== parseInt(req.params.id))
-	res.send(JSON.stringify({
-		success: true,
-		notice: 'Ban da xoa thanh cong',
-	}))
+	res.status(204).json()
 })
 
 module.exports = user_router
