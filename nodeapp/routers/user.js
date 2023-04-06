@@ -49,7 +49,7 @@ user_router.put('/edit/:id', (req, res) => {
 })
 
 user_router.delete('/delete/:id', (req, res) => {
-	const user = users.find(user => user.id === parseInt(req.params.id))
+	users = users.filter(item => item.id !== parseInt(req.params.id))
 	res.send(JSON.stringify({
 		success: true,
 		notice: 'Ban da xoa thanh cong',
