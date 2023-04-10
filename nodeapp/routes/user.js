@@ -3,7 +3,7 @@ const Validate = require('../middlewars/validate')
 const express = require('express')
 const user_router = express.Router();
 
-user_router.use(express.json())//json -> object
+// user_router.use(express.json())//json -> object
 
 let  users = [
     {
@@ -39,15 +39,15 @@ user_router.put('/:id', (req, res) => {
 		user.fullname = req.body.fullname
 		user.gender = req.body.gender
 		user.age = req.body.age
-		res.status(200).json(user)
+		res.status(200).json('Ban da cap nhat thanh cong')
 	} else {
-		res.status(204).json()
+		res.status(204).json('Ban da cap nhat that bai')
 	}
 })
 
 user_router.delete('/:id', (req, res) => {
 	users = users.filter(item => item.id !== parseInt(req.params.id))
-	res.status(204).json()
+	res.status(204).json('Ban da xoa thanh cong')
 })
 
 module.exports = user_router
