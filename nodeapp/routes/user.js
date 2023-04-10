@@ -30,7 +30,7 @@ user_router.post('/', Validate, (req, res) => {
         ...req.body
 	}
 	users.push(user)
-	res.status(201).json('Ban da them thanh cong')
+	res.status(201).json(user)
 })
 
 user_router.put('/:id', (req, res) => {
@@ -47,7 +47,7 @@ user_router.put('/:id', (req, res) => {
 
 user_router.delete('/:id', (req, res) => {
 	users = users.filter(item => item.id !== parseInt(req.params.id))
-	res.status(204).json('Ban da xoa thanh cong')
+	res.status(200).json('Ban da xoa thanh cong')
 })
 
 module.exports = user_router

@@ -3,7 +3,7 @@ function Validate(req, res, next) {
         ...req.body
 	}
     const regex = /^[a-zA-ZÀÁÂÃÈÉÊÌÍÒÓÔÕÙÚĂĐĨŨƠàáâãèéêìíòóôõùúăđĩũơƯĂẠẢẤẦẨẪẬẮẰẲẴẶẸẺẼỀỀỂẾưăạảấầẩẫậắằẳẵặẹẻẽềềểếỄỆỈỊỌỎỐỒỔỖỘỚỜỞỠỢỤỦỨỪễệỉịọỏốồổỗộớờởỡợụủứừỬỮỰỲỴÝỶỸửữựỳỵỷỹ\s\W|_]+$/;
-    if(!regex.test(user.name)){
+    if(!regex.test(user.fullname)){
         res.status(400).send('Ban vui long nhap lai ten')
     } else {
         next()
