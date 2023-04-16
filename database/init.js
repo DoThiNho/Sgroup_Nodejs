@@ -1,4 +1,5 @@
-const connection = require('../database/connection')
+const connection = require('./connection')
+
 
 connection.query("CREATE TABLE User (id INT AUTO_INCREMENT, fullname varchar(255) NOT NULL, gender boolean, age INT NOT NULL, PRIMARY KEY(id))", (err, result) => {
     console.log(err);
@@ -37,3 +38,6 @@ connection.query("DELETE FROM User WHERE id = ?", [3], (err, result) => {
     console.log("DELETE Done");
     console.log(err);
 })
+
+
+
