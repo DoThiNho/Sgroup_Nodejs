@@ -2,52 +2,58 @@ const Validate = require('../middlewars/validate')
 
 const express = require('express')
 const user_router = express.Router();
+const connection = require('../../database/connection')
 
-// user_router.use(express.json())//json -> object
-
-let  users = [
-    {
-		"id": 1,
-		"fullname": "Nguyen Huy Tuong",
-		"gender": true,
-		"age": 18
-	},
-	{
-		"id": 2,
-		"fullname": "Nguyen Thi Tuong",
-		"gender": false,
-		"age": 15
-	}
-]
 
 user_router.get('/',(req, res) => {
-    res.status(200).send(users)
+	const query = "SELECT * FROM User"
+	connection.query(query, (error, result) => {
+		if(error){
+			return res.status(500).send("Error : Can't get data")
+		} else {
+			return res.status(200).json(result)
+		}
+	})
 })
 
 user_router.post('/', Validate, (req, res) => {
-	const user = {
-        'id': users.length + 1,
-        ...req.body
-	}
-	users.push(user)
-	res.status(201).json(user)
+	const {fullname, gender, age} = req.body
+	const query = "INSERT INTO User(fullname, gender, age) VALUES (?, ?, ?)"
+	connection.query(query, [fullname, gender, age], (error, result) => {
+        if (error) {
+            return res.status(500).send("Error : Can't post data");
+        }
+        else {
+            return res.status(201).send("Insert Done");
+        }
+    })
 })
 
 user_router.put('/:id', (req, res) => {
-	const user = users.find(user => user.id === parseInt(req.params.id))
-	if(req.body != null){
-		user.fullname = req.body.fullname
-		user.gender = req.body.gender
-		user.age = req.body.age
-		res.status(200).json('Ban da cap nhat thanh cong')
-	} else {
-		res.status(204).json('Ban da cap nhat that bai')
-	}
+	const id = req.params.id
+	const {fullname, gender, age} = req.body
+	const query = "UPDATE User SET fullname = ? WHERE id = ?"
+	connection.query(query, [fullname, id], (error, result) => {
+		if (error) {
+            return res.status(500).send("Error : Can't update data");
+        }
+        else {
+            return res.status(204).send("Update done");
+        }
+	})
 })
 
 user_router.delete('/:id', (req, res) => {
-	users = users.filter(item => item.id !== parseInt(req.params.id))
-	res.status(200).json('Ban da xoa thanh cong')
+	const id = req.params.id;
+    const query = 'DELETE FROM User WHERE id = ?';
+    connection.query(query, [id], (error, result) => {
+        if (error) {
+            return res.status(500).send("Error : Can't delete data");
+        }
+        else {
+            res.status(204).send("Delete done");
+        }
+    });
 })
 
 module.exports = user_router
