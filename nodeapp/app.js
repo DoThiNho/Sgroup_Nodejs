@@ -5,8 +5,11 @@ const port = 3000
 const userRoute = require('./routes/user')
 
 app.use(express.json())
-app.use('/user', userRoute);
+app.use('/User', userRoute);
 
 app.listen(port, function(){
     console.log(`Your app running on port ${port}`);
 })
+
+
+
