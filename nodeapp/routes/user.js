@@ -1,53 +1,98 @@
-const Validate = require('../middlewars/validate')
-
 const express = require('express')
-const user_router = express.Router();
+const jsonwebtoken = require('jsonwebtoken')
+const user_router = express.Router()
+const crypto = require('crypto')
 
-// user_router.use(express.json())//json -> object
+// const app = express()
 
-let  users = [
+const { privateKey, publicKey } = crypto.generateKeyPairSync('rsa', {
+    modulesLength: 2048
+})
+
+const dbs = [
     {
-		"id": 1,
-		"fullname": "Nguyen Huy Tuong",
-		"gender": true,
-		"age": 18
-	},
-	{
-		"id": 2,
-		"fullname": "Nguyen Thi Tuong",
-		"gender": false,
-		"age": 15
-	}
-]
+        username: 'thinh',
+        age: 22,
+        email: 'thinh@gmail.com',
+        id: 1,
+        password: 'thinh12345',
+        balance: 1000000,
+    },
+    {
+        username: 'phu',
+        age: 24,
+        email: 'phu@gmail.com',
+        id: 2,
+        password: 'phu12345',
+        balance: 1000000000,
+    },
+];
 
-user_router.get('/',(req, res) => {
-    res.status(200).send(users)
+// const SECRET = 'your-secret'
+
+// app.use(express.json())
+
+user_router.post('/login', (req, res) => {
+    const username = req.body.username
+    const password = req.body.password
+
+    const user = dbs.find(u => u.username == username)
+
+    if(!user){
+        return res.status(400).json({
+            message: 'User not found'
+        })
+    } 
+
+    if(user.password == password){
+        const jwt = jsonwebtoken.sign({
+            username: user.username,
+            email: user.email,
+            age: user.age
+        }, privateKey, {
+            algorithm: 'RS256',
+            expiresIn: '1h',
+        })
+
+        return res.status(200).json({
+            data: jwt,
+            message: 'Login sucess',
+        })
+    }
+    
+    return res.status(401).json({
+        message: 'Invalid credentials',
+    });
+
 })
 
-user_router.post('/', Validate, (req, res) => {
-	const user = {
-        'id': users.length + 1,
-        ...req.body
-	}
-	users.push(user)
-	res.status(201).json(user)
-})
+user_router.get('/balance', (req, res, next) => {
+    const username = req.body.username
+    const authorizationHeader = req.headers.authorization
+    const userToken = authorizationHeader.substring(7)
 
-user_router.put('/:id', (req, res) => {
-	const user = users.find(user => user.id === parseInt(req.params.id))
-	if(req.body != null){
-		user.fullname = req.body.fullname
-		user.gender = req.body.gender
-		user.age = req.body.age
-		res.status(200).json('Ban da cap nhat thanh cong')
-	} else {
-		res.status(204).json('Ban da cap nhat that bai')
-	}
-})
+    try {
+        const isTokenValid = jsonwebtoken.verify(userToken, SECRET);
+        
+        // Authorization success
+        if (isTokenValid.username == username) {
+            const user = dbs.find(u => u.username === username);
 
-user_router.delete('/:id', (req, res) => {
-	users = users.filter(item => item.id !== parseInt(req.params.id))
-	res.status(200).json('Ban da xoa thanh cong')
+            return res.status(200).json({
+                balance: user.balance,
+            });
+        }
+
+        // Authorization failed
+        return res.status(401).json({
+            message: 'unauthorized',
+        });
+    } catch (error) {
+        return res.status(401).json({
+            message: error.message,
+        });
+    }
 })
 
 module.exports = user_router
+
