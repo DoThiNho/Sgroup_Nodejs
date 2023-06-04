@@ -1,52 +1,81 @@
+const db = require('../database/knex-connection')
 const express = require('express');
 const jsonwebtoken = require('jsonwebtoken')
 const router = express.Router();
-const {validateUserUpdate } = require('../middleware/validateUser')
+const {validateUser } = require('../middleware/validateUser')
 const { update } = require('../database/query')
+const { verifyToken, verifyTokenAndAuthorization } = require('./verifyToken')
+const {hashPassword} = require('../helpers/hash')
 
-
-const db = require('../database/connection');
-
-// UPDATE USER INFO
-router.put('/:id', validateUserUpdate, async function (req, res, next) {
-    const SECRET = process.env.SECRET
-    const id = req.params.id
-    const {name, age, gender} = req.body
-    const authorizationHeader = req.headers.authorization
-    const userToken = authorizationHeader.substring(7)
-    try {
-        const isTokenValid = jsonwebtoken.verify(userToken, SECRET);
-        if (isTokenValid.id == id) {
-            const isUpdateUser = await update({
-                db,
-                query: "UPDATE users SET name = ?, age = ?, gender = ? WHERE id = ?",
-                params: [
-                    name,
-                    age,
-                    gender,
-                    id
-                ]
+router.post('/', [verifyToken, validateUser], async (req, res) => {
+    if(req.user.isAdmin) {
+        const isExistedUsername  = await db.select().from('users').where('username', req.body.username).first()
+        if (!isExistedUsername) {
+            const {
+                hashedPassword,
+                salt
+            } = hashPassword(password)
+            const { username, name, email, age, gender} = req.body;
+            const createdBy = req.user.id
+            const createdAt = new Date();
+            
+            db('users')
+            .insert({ username, hashedPassword, salt, name, email, age, gender, createdBy, createdAt})
+            .then(() => {
+                res.status(201).send('Insert Done');
             })
-
-            if(!isUpdateUser){
-               return res.status(500).json("Error : Can't update data")
-            }
-            return res.status(200).json({
-                message: "Update successfull"
-            })
-        }
-
-        // Authorization failed
-        return res.status(401).json({
-            message: 'unauthorized',
-        });
-
-    } catch (error) {
-        return res.status(401).json({
-            message: error.message,
-        });
+            .catch((error) => {
+                console.log(error);
+                res.status(500).send("Error: Can't post data");
+            });
+        }        
     }
-
 });
+
+router.put('/:id', verifyTokenAndAuthorization, async (req, res) => {
+    const {name, age, gender} = req.body
+    await db('users')
+        .where('id', req.params.id)
+        .update({
+            'name': name,
+            'age': age,
+            'gender': gender,
+        })
+    return res.status(200).json({ message: 'Update succesfully' })
+})
+
+router.delete('/:id', verifyTokenAndAuthorization, async (req, res) => {
+    await db('users')
+        .where('id', req.params.id)
+        .del()
+    return res.status(200).json({ message: 'Delete succesfully' })
+})
+
+// pagination and search
+route.get('/', async (req, res) => {
+    const { page, size, title} = req.query;
+    let pagination = {};
+    if (page < 1) page = 1;
+    var offset = (page - 1) * size;
+    return Promise.all([
+        db.count("* as count").from("users").first(),
+        db.select("*").from("users").where("name", "like", `%${title}%`).offset(offset).limit(size),
+        ])
+        .then(([total, rows]) => {
+            var count = total.count;
+            var rows = rows;
+            pagination.total = count;
+            pagination.per_page = size;
+            pagination.offset = offset;
+            pagination.to = offset + rows.length;
+            pagination.last_page = Math.ceil(count / size);
+            pagination.current_page = page;
+            pagination.from = offset;
+            pagination.data = rows;
+            res.status(200).json({ message: pagination })
+    });
+})
+
+  
 
 module.exports = router;

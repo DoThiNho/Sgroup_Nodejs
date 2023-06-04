@@ -17,16 +17,16 @@ function checkAge(age){
 }
 
 function validateUser(req, res, next) {
-    const {username, password, confirmpassword, name, age, gender, email} = req.body 
+    const {username, password, name, age, gender, email, createdBy, createdAt} = req.body 
     if(!checkMinLength(username, 3)){
         res.status(400).json('Length username < 3')
     }
     if(!checkMinLength(password, 3)){
         res.status(400).json('Length password < 3')
     }
-    if(confirmpassword !== password){
-        res.status(400).json("Password not match")
-    }
+    // if(confirmpassword !== password){
+    //     res.status(400).json("Password not match")
+    // }
     if(!checkEmail(email)){
         res.status(400).json("Invalid email")
     }

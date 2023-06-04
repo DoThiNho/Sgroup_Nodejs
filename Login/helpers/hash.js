@@ -1,4 +1,3 @@
-const { log } = require('console')
 const crypto = require('crypto')
 
 const hashPassword = (input) => {

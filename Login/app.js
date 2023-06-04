@@ -2,6 +2,7 @@ const express = require('express')
 const app = express()
 app.use(express.json())
 
+
 // Require user route
 // const userRoute = require('./users/route')
 const authRoute = require('./routes/auth')
