@@ -1,6 +1,5 @@
 const db = require('../database/knex-connection')
 const express = require('express');
-const jsonwebtoken = require('jsonwebtoken')
 const router = express.Router();
 const {validateUser } = require('../middleware/validateUser')
 const { update } = require('../database/query')
@@ -52,7 +51,7 @@ router.delete('/:id', verifyTokenAndAuthorization, async (req, res) => {
 })
 
 // pagination and search
-route.get('/', async (req, res) => {
+router.get('/', async (req, res) => {
     const { page, size, title} = req.query;
     let pagination = {};
     if (page < 1) page = 1;
@@ -75,7 +74,5 @@ route.get('/', async (req, res) => {
             res.status(200).json({ message: pagination })
     });
 })
-
-  
 
 module.exports = router;

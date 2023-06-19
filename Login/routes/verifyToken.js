@@ -6,11 +6,13 @@ const verifyToken = (req, res, next) => {
     if(!token) return res.status(401).json('Unauthorize user')
 
    try{
-        const decoded = jwt.verify(token,process.env.SECRET);
+        const decoded = jwt.verify( token , process.env.SECRET );
+        console.log(decoded)
         req.user = decoded
         next()
 
    }catch(e){
+    console.log(e)
     res.status(400).json('Token not valid')
    }
 }

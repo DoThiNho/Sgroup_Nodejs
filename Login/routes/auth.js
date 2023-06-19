@@ -1,6 +1,5 @@
- const express = require('express')
- const db = require('../database/knex-connection')
-const { getOne, create } = require('../database/query')
+const express = require('express')
+const db = require('../database/knex-connection')
 const {hashPassword, hashPasswordWithSalt} = require('../helpers/hash')
 const {validateUser, validateRequest} = require('../middleware/validateUser')
 const {mailService} = require('../services/mail.service')
@@ -21,7 +20,7 @@ router.post('/register', [validateRequest, validateUser], async (req, res) => {
         age: req.body.age,
         salt: salt,
         isAdmin: req.body.isAdmin,
-        createAt: new Date(Date.now())
+        createdAt: new Date(Date.now())
     }
     // console.log(username, password);
     // check if user with username already existed
@@ -40,13 +39,14 @@ router.post('/register', [validateRequest, validateUser], async (req, res) => {
 
 
 router.post('/login', validateRequest, async function (req, res) {
+    const SECRET = process.env.SECRET
     // Get username, password from request body
     const {
         username,
         password, 
     } = req.body
     // Check if user exists
-    const user = await knex.select('*').from('users').where('username', username).first()
+    const user = await db.select('*').from('users').where('username', username).first()
     if(!user) {
         return res.status(400).json( {
             message: 'User not found',
